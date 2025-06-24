@@ -1,4 +1,4 @@
-local window = require("hs.window")
+local window = require "hs.window"
 window.animationDuration = 0
 
 ------

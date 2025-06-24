@@ -28,14 +28,14 @@ end
 
 -- Carry windows to next/previous space
 Bind(TLKeys.window, "tab", nil, function()
-  yabai("window --space next")
+  yabai "window --space next"
 end)
 
 Bind(TLKeys.hyper, "tab", nil, function()
-  yabai("window --space prev")
+  yabai "window --space prev"
 end)
 
 -- PiP
 Bind(TLKeys.window, "p", nil, function()
-  yabai("window --toggle sticky --toggle topmost --toggle pip")
+  yabai "window --toggle sticky --toggle topmost --toggle pip"
 end)

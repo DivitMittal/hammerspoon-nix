@@ -3,7 +3,7 @@ Bind = require("hs.hotkey").bind
 TLKeys = {}
 TLKeys.hyper = { "alt", "ctrl", "shift", "cmd" }
 
-local app = require("hs.application")
+local app = require "hs.application"
 local bundleID = {
   wezterm = "com.github.wez.wezterm",
   launchpad = "com.apple.launchpad.launcher",
@@ -15,7 +15,7 @@ Bind(TLKeys.hyper, "l", nil, function()
   app.launchOrFocusByBundleID(bundleID.launchpad)
 end)
 
-local wifi = require("hs.wifi")
+local wifi = require "hs.wifi"
 Bind(TLKeys.hyper, "i", nil, function()
   local status = wifi.interfaceDetails().power
   wifi.setPower(not status)
@@ -30,6 +30,6 @@ local function blueutil(args)
   return out
 end
 Bind(TLKeys.hyper, "b", nil, function()
-  local status = tonumber(blueutil("-p"))
+  local status = tonumber(blueutil "-p")
   blueutil(string.format("-p %s", status == 0 and 1 or 0))
 end)

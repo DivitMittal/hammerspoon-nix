@@ -1,4 +1,4 @@
-local VimMode = hs.loadSpoon("VimMode")
+local VimMode = hs.loadSpoon "VimMode"
 local vim = VimMode:new()
 
 vim
@@ -7,8 +7,8 @@ vim
   :disableForApp("iTerm2")
   :disableForApp("Terminal")
   :disableForApp("Code")
-  :disableForApp("Obsidian")
+  :disableForApp "Obsidian"
 vim:shouldDimScreenInNormalMode(false)
 vim:shouldShowAlertInNormalMode(true)
 vim:setAlertFont(Font.default)
-vim:enterWithSequence('tn')
+vim:enterWithSequence "tn"

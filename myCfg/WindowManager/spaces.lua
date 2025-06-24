@@ -1,7 +1,7 @@
-local spaces = require("hs.spaces")
-local window = require("hs.window")
+local spaces = require "hs.spaces"
+local window = require "hs.window"
 
-Drag = hs.loadSpoon("Drag")
+Drag = hs.loadSpoon "Drag"
 
 -- Wait time for mission control in seconds to perform certain functions
 local mcWaitTime = 0.275
