@@ -7,7 +7,10 @@
   in
     mkFlake {inherit inputs specialArgs;} ({inputs, ...}: {
       systems = builtins.import inputs.systems;
-      imports = [./flake];
+      imports = [
+        ./flake
+        ./modules
+      ];
     });
 
   inputs = {
