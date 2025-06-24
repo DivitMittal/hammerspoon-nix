@@ -26,7 +26,7 @@ local blueutilBin = string.gsub(blueutilOutput, "%s+", "")
 local function blueutil(args)
   local command = string.format("%s %s", blueutilBin, args)
   print(string.format("blueutil: %s", command))
-  local out, _, _, _ = hs.execute(command)
+  local out, _, _, _ = hs.execute(command, false)
   return out
 end
 Bind(TLKeys.hyper, "b", nil, function()
