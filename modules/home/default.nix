@@ -1,3 +1,3 @@
-{customLib, ...}: {
-  imports = customLib.scanPaths ./.;
+_: {
+  imports = [ ./hammerspoon.nix ];
 }
