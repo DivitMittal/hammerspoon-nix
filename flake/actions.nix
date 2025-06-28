@@ -3,7 +3,7 @@
 
   flake.actions-nix = {
     pre-commit.enable = true;
-    defaults = {
+    defaultValues = {
       jobs = {
         runs-on = "ubuntu-latest";
         timeout-minutes = 30;
@@ -52,7 +52,7 @@
             ++ [
               {
                 name = "Run nix flake check";
-                run = "nix flake check --impure --all-systems --no-build";
+                run = "nix -vL flake check --impure --all-systems --no-build";
               }
             ];
         };
