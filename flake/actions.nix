@@ -24,7 +24,7 @@
         pull_request = push;
         workflow_dispatch = {};
       };
-      permissions = {
+      common-permissions = {
         contents = "write";
         id-token = "write";
       };
@@ -46,13 +46,39 @@
       ".github/workflows/flake-check.yml" = {
         inherit on;
         jobs.checking-flake = {
-          inherit permissions;
+          permissions = common-permissions;
           steps =
             common-actions
             ++ [
               {
                 name = "Run nix flake check";
                 run = "nix -vL flake check --impure --all-systems --no-build";
+              }
+            ];
+        };
+      };
+      ".github/workflows/flake-lock-update.yml" = {
+        on = {
+          workflow_dispatch = {};
+          schedule = [
+            {
+              cron = "0 0 * * 0"; # Every Sunday at midnight
+            }
+          ];
+        };
+        jobs.locking-flake = {
+          permissions =
+            common-permissions
+            // {
+              issues = "write";
+              pull-requests = "write";
+            };
+          steps =
+            common-actions
+            ++ [
+              {
+                name = "Update flake.lock";
+                uses = "DeterminateSystems/update-flake-lock@main";
               }
             ];
         };
