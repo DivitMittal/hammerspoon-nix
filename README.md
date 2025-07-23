@@ -15,7 +15,12 @@
 ---
 
 <div align='center'>
-    <img src="https://github.com/DivitMittal/hammerspoon-nix/actions/workflows/flake-check.yml/badge.svg" alt="nix-flake-check"/> <img src="https://github.com/DivitMittal/hammerspoon-nix/actions/workflows/flake-lock-update.yml/badge.svg" alt="Update flake.lock"/>
+    <a href="https://github.com/DivitMittal/hammerspoon-nix/actions/workflows/flake-check.yml">
+        <img src="https://github.com/DivitMittal/hammerspoon-nix/actions/workflows/flake-check.yml/badge.svg" alt="nix-flake-check"/>
+    </a>
+    <a href="https://github.com/DivitMittal/hammerspoon-nix/actions/workflows/flake-lock-update.yml">
+        <img src="https://github.com/DivitMittal/hammerspoon-nix/actions/workflows/flake-lock-update.yml/badge.svg" alt="Update flake.lock"/>
+    </a>
 </div>
 
 ---
