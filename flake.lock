@@ -3,11 +3,11 @@
     "OS-nixCfg": {
       "flake": false,
       "locked": {
-        "lastModified": 1752842678,
-        "narHash": "sha256-A+MPuqWK0Nt2w3KhGUCua81KSD7HY7RO0Pk/po+HoxE=",
+        "lastModified": 1753307304,
+        "narHash": "sha256-NWyRa/mG1foqR+V0aFr8urSBlJgj+6+1nRxIrtu8qEE=",
         "owner": "DivitMittal",
         "repo": "OS-nixCfg",
-        "rev": "9334a9138430d8bc2ad3146a9b0a81daa948fc90",
+        "rev": "56ef66fd3e0ac2b3ac874d670ed19cfab6fa848d",
         "type": "github"
       },
       "original": {
