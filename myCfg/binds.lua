@@ -70,3 +70,23 @@ Bind(TLKeys.hyper, "e", nil, function()
   local set_cmd = string.format("-a lowpowermode %s", new_status)
   pmset(set_cmd)
 end)
+
+-- GPU Switching (Integrated/Dedicated)
+local function getStatusGPU()
+  local status_cmd = "/usr/bin/pmset -g | " .. rgBin .. " 'gpuswitch' | " .. awkBin .. " '{print $2}'"
+  local status, _, _, _ = hs.execute(status_cmd, false)
+  return tonumber(status)
+end
+
+Bind(TLKeys.hyper, "g", nil, function()
+  local current_status = getStatusGPU()
+  local new_status = current_status == 0 and 1 or 0
+  local gpu_type = new_status == 0 and "Integrated" or "Dedicated"
+
+  local set_cmd = string.format("gpuswitch %s", new_status)
+  pmset(set_cmd)
+
+  -- Visual alert
+  local message = string.format("GPU: %s", gpu_type)
+  hs.alert.show(message, 2)
+end)
