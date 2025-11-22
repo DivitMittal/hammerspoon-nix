@@ -90,3 +90,12 @@ Bind(TLKeys.hyper, "g", nil, function()
   local message = string.format("GPU: %s", gpu_type)
   hs.alert.show(message, 2)
 end)
+
+-- Warpd (keyboard-driven mouse control)
+local warpdOutput, _, _, _ = hs.execute("which warpd", true)
+local warpdBin = string.gsub(warpdOutput, "%s+", "")
+
+Bind(TLKeys.hyper, "m", nil, function()
+  local command = string.format("%s --normal &", warpdBin)
+  os.execute(command)
+end)
