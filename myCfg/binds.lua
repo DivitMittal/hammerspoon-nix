@@ -3,6 +3,13 @@ Bind = require("hs.hotkey").bind
 TLKeys = {}
 TLKeys.hyper = { "alt", "ctrl", "shift", "cmd" }
 
+-- Reserved Raycast binds (do not clobber):
+-- hyper+space: Raycast launcher
+-- hyper+a: Raycast switch audio devices
+-- hyper+p: Raycast menubar items
+-- hyper+n: Raycast quick note
+-- hyper+w: Raycast active windows
+
 -- App Launcher (add Hammerspoon to App Management in System Settings > Security & Privacy)
 local bundleID = {
   launchpad = "com.apple.launchpad.launcher",
@@ -14,14 +21,31 @@ local app = require "hs.application"
 Bind(TLKeys.hyper, "l", nil, function()
   app.launchOrFocusByBundleID(bundleID.launchpad)
 end)
-Bind(TLKeys.hyper, "f", nil, function()
+Bind(TLKeys.hyper, "s", nil, function()
   app.launchOrFocusByBundleID(bundleID.firefox)
 end)
 Bind(TLKeys.hyper, "return", nil, function()
   app.launchOrFocusByBundleID(bundleID.wezterm)
 end)
-Bind(TLKeys.hyper, "j", nil, function()
+Bind(TLKeys.hyper, "y", nil, function()
   app.launchOrFocusByBundleID(bundleID.handmirror)
+end)
+
+-- Warpd (keyboard-driven mouse control)
+local warpdOutput, _, _, _ = hs.execute("which warpd", true)
+local warpdBin = string.gsub(warpdOutput, "%s+", "")
+
+Bind(TLKeys.hyper, "f", nil, function()
+  local command = string.format("%s --hint --oneshot &", warpdBin)
+  os.execute(command)
+end)
+Bind(TLKeys.hyper, "g", nil, function()
+  local command = string.format("%s --grid --oneshot &", warpdBin)
+  os.execute(command)
+end)
+Bind(TLKeys.hyper, "o", nil, function()
+  local command = string.format("%s --normal --oneshot &", warpdBin)
+  os.execute(command)
 end)
 
 -- Wifi Toggle
@@ -82,7 +106,7 @@ local function getStatusGPU()
   return tonumber(status)
 end
 
-Bind(TLKeys.hyper, "g", nil, function()
+Bind(TLKeys.hyper, "m", nil, function()
   local current_status = getStatusGPU()
   local new_status = current_status == 0 and 1 or 0
   local gpu_type = new_status == 0 and "Integrated" or "Dedicated"
@@ -93,13 +117,4 @@ Bind(TLKeys.hyper, "g", nil, function()
   -- Visual alert
   local message = string.format("GPU: %s", gpu_type)
   hs.alert.show(message, 2)
-end)
-
--- Warpd (keyboard-driven mouse control)
-local warpdOutput, _, _, _ = hs.execute("which warpd", true)
-local warpdBin = string.gsub(warpdOutput, "%s+", "")
-
-Bind(TLKeys.hyper, "m", nil, function()
-  local command = string.format("%s --normal &", warpdBin)
-  os.execute(command)
 end)
