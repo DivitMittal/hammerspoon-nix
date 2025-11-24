@@ -8,6 +8,7 @@ local bundleID = {
   launchpad = "com.apple.launchpad.launcher",
   firefox = "org.mozilla.firefox",
   wezterm = "com.github.wez.wezterm",
+  handmirror = "net.rafaelconde.Hand-Mirror",
 }
 local app = require "hs.application"
 Bind(TLKeys.hyper, "l", nil, function()
@@ -18,6 +19,9 @@ Bind(TLKeys.hyper, "f", nil, function()
 end)
 Bind(TLKeys.hyper, "return", nil, function()
   app.launchOrFocusByBundleID(bundleID.wezterm)
+end)
+Bind(TLKeys.hyper, "j", nil, function()
+  app.launchOrFocusByBundleID(bundleID.handmirror)
 end)
 
 -- Wifi Toggle

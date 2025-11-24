@@ -10,7 +10,7 @@ jobs:
       with:
         fetch-depth: 1
         persist-credentials: false
-    - uses: DeterminateSystems/nix-installer-action@v19
+    - uses: DeterminateSystems/nix-installer-action@v21
     - name: Magic Nix Cache(Use GitHub Actions Cache)
       uses: DeterminateSystems/magic-nix-cache-action@main
     - name: Run nix flake check
