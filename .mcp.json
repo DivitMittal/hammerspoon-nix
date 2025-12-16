@@ -9,9 +9,9 @@
         "serena",
         "start-mcp-server",
         "--context",
-        "ide-assistant",
+        "claude-code",
         "--project",
-        "~/Projects/hammerspoon-nix/"
+        "~/Projects/Cfgs/hammerspoon-nix/"
       ],
       "env": {}
     }
