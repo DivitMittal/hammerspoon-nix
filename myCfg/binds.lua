@@ -12,15 +12,11 @@ TLKeys.hyper = { "alt", "ctrl", "shift", "cmd" }
 
 -- App Launcher (add Hammerspoon to App Management in System Settings > Security & Privacy)
 local bundleID = {
-  launchpad = "com.apple.launchpad.launcher",
   firefox = "org.mozilla.firefox",
   wezterm = "com.github.wez.wezterm",
   handmirror = "net.rafaelconde.Hand-Mirror",
 }
 local app = require "hs.application"
-Bind(TLKeys.hyper, "l", nil, function()
-  app.launchOrFocusByBundleID(bundleID.launchpad)
-end)
 Bind(TLKeys.hyper, "s", nil, function()
   app.launchOrFocusByBundleID(bundleID.firefox)
 end)
