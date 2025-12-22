@@ -1,5 +1,3 @@
-# CLAUDE.md
-
 ## Project Overview
 
 This is a Nix flake that provides both:
