@@ -3,11 +3,11 @@
     "OS-nixCfg": {
       "flake": false,
       "locked": {
-        "lastModified": 1766267233,
-        "narHash": "sha256-JTjqVHWOHD+npXfh9yfN8PPB8m8b4kFVF7T7cxdp85c=",
+        "lastModified": 1766814015,
+        "narHash": "sha256-NLrOzoqI3WDYbIr2PNtOHVa9bZAWya+yjaoVA5gWOVA=",
         "owner": "DivitMittal",
         "repo": "OS-nixCfg",
-        "rev": "59ec75b6911572bc5e5185037b02e6442ef51d3d",
+        "rev": "79770147798a526fc653ec4641ba6716980d6cf7",
         "type": "github"
       },
       "original": {
@@ -141,11 +141,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1766125104,
-        "narHash": "sha256-l/YGrEpLromL4viUo5GmFH3K5M1j0Mb9O+LiaeCPWEM=",
+        "lastModified": 1766840161,
+        "narHash": "sha256-Ss/LHpJJsng8vz1Pe33RSGIWUOcqM1fjrehjUkdrWio=",
         "owner": "nixos",
         "repo": "nixpkgs",
-        "rev": "7d853e518814cca2a657b72eeba67ae20ebf7059",
+        "rev": "3edc4a30ed3903fdf6f90c837f961fa6b49582d1",
         "type": "github"
       },
       "original": {
