@@ -14,7 +14,6 @@ TLKeys.hyper = { "alt", "ctrl", "shift", "cmd" }
 local bundleID = {
   firefox = "org.mozilla.firefox",
   wezterm = "com.github.wez.wezterm",
-  handmirror = "net.rafaelconde.Hand-Mirror",
 }
 local app = require "hs.application"
 Bind(TLKeys.hyper, "s", nil, function()
@@ -22,9 +21,6 @@ Bind(TLKeys.hyper, "s", nil, function()
 end)
 Bind(TLKeys.hyper, "return", nil, function()
   app.launchOrFocusByBundleID(bundleID.wezterm)
-end)
-Bind(TLKeys.hyper, "y", nil, function()
-  app.launchOrFocusByBundleID(bundleID.handmirror)
 end)
 
 -- Warpd (keyboard-driven mouse control)
@@ -37,10 +33,6 @@ Bind(TLKeys.hyper, "f", nil, function()
 end)
 Bind(TLKeys.hyper, "g", nil, function()
   local command = string.format("%s --grid --oneshot &", warpdBin)
-  os.execute(command)
-end)
-Bind(TLKeys.hyper, "o", nil, function()
-  local command = string.format("%s --normal --oneshot &", warpdBin)
   os.execute(command)
 end)
 
