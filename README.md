@@ -94,3 +94,7 @@ Then, enable and configure the `programs.hammerspoon` module in your `home.nix` 
 - `programs.hammerspoon.package`: (Package or `null`) Specifies the Hammerspoon package to use. Defaults to `null`, which means Home-Manager will not manage the Hammerspoon application itself, only its configuration. You can set this to `pkgs.brewCasks.hammerspoon` or a custom build.
 - `programs.hammerspoon.configPath`: (Path or `null`) Defines the path to your Hammerspoon configuration. This can be a single `init.lua` file or a directory containing your configuration files. If a directory, its contents will be copied.
 - `programs.hammerspoon.spoons`: (Attribute set of Paths) An attribute set where keys are the desired spoon names (e.g., "ReloadConfiguration") and values are paths to the spoon directories (e.g., `pkgs.fetchFromGitHub { ... }` or `./path/to/spoon.spoon`). These spoons will be installed into the `Spoons/` subdirectory of your Hammerspoon configuration.
+
+## Related Repositories
+
+- [DivitMittal/OS-nixCfg](https://github.com/DivitMittal/OS-nixCfg): Main Nix configurations repository

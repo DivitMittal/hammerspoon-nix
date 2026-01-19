@@ -33,9 +33,6 @@ nix flake update
 ```bash
 # Format all code (Nix with alejandra, Lua with stylua)
 nix fmt
-
-# Run pre-commit hooks manually
-pre-commit run --all-files
 ```
 
 ## Architecture
