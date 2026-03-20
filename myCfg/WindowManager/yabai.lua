@@ -6,6 +6,21 @@ local function yabai(args)
   os.execute(command)
 end
 
+-- Focus windows linearly (BSP & floating) — up=prev, down=next in sorted order
+local focusWindowJq = {
+  up   = [[sort_by(.display, .space, .frame.x, .frame.y, .id) | map(select(."is-visible" == true and .role != "AXUnknown")) | nth(index(map(select(."has-focus" == true))) - 1).id]],
+  down = [[sort_by(.display, .space, .frame.x, .frame.y, .id) | map(select(."is-visible" == true and .role != "AXUnknown")) | reverse | nth(index(map(select(."has-focus" == true))) - 1).id]],
+}
+for key, jqExpr in pairs(focusWindowJq) do
+  Bind(TLKeys.window, key, nil, function()
+    local cmd = string.format("%s -m query --windows | jq -re '%s'", yabaiBin, jqExpr)
+    local windowId = string.gsub(hs.execute(cmd, true), "%s+", "")
+    if windowId ~= "" then
+      yabai(string.format("window --focus %s", windowId))
+    end
+  end)
+end
+
 -- Focus spaces
 local focus = { right = "next", left = "prev" }
 for key, direction in pairs(focus) do
