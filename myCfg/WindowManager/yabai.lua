@@ -14,6 +14,7 @@ local focusWindowJq = {
 for key, jqExpr in pairs(focusWindowJq) do
   Bind(TLKeys.window, key, nil, function()
     local cmd = string.format("%s -m query --windows | jq -re '%s'", yabaiBin, jqExpr)
+    print(string.format("yabai: %s", cmd))
     local windowId = string.gsub(hs.execute(cmd, true), "%s+", "")
     if windowId ~= "" then
       yabai(string.format("window --focus %s", windowId))
