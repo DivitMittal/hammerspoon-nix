@@ -10,15 +10,14 @@ end
 
 -- Focus windows linearly (BSP & floating) — up=prev, down=next in sorted order
 local focusWindowJq = {
-  up   = [[sort_by(.display, .space, .frame.x, .frame.y, .id) | map(select(."is-visible" == true and .role != "AXUnknown")) | nth(index(map(select(."has-focus" == true))) - 1).id]],
-  down = [[sort_by(.display, .space, .frame.x, .frame.y, .id) | map(select(."is-visible" == true and .role != "AXUnknown")) | reverse | nth(index(map(select(."has-focus" == true))) - 1).id]],
+  up = [[sort_by(.display, .space, .frame.x, .frame.y, .id) | map(select(."is-visible" == true and .role != "AXUnknown")) | . as $w | ($w | map(."has-focus") | index(true)) as $i | if $i != null then $w[$i - 1].id else empty end]],
+  down = [[sort_by(.display, .space, .frame.x, .frame.y, .id) | map(select(."is-visible" == true and .role != "AXUnknown")) | . as $w | ($w | map(."has-focus") | index(true)) as $i | if $i != null then $w[($i + 1) % ($w | length)].id else empty end]],
 }
 for key, jqExpr in pairs(focusWindowJq) do
   Bind(TLKeys.window, key, nil, function()
-    local jqExprShell = jqExpr:gsub('"', '\\"')
-    local cmd = string.format('%s -m query --windows | %s -re "%s"', yabaiBin, jqBin, jqExprShell)
+    local cmd = string.format("%s -m query --windows | %s -re '%s' 2>&1", yabaiBin, jqBin, jqExpr)
     print(string.format("yabai: %s", cmd))
-    local windowId = string.gsub(hs.execute(cmd, true), "%s+", "")
+    local windowId = string.gsub(hs.execute(cmd, false), "%s+", "")
     if windowId ~= "" then
       yabai(string.format("window --focus %s", windowId))
     end
@@ -47,14 +46,14 @@ end
 
 -- Carry windows to next/previous space
 Bind(TLKeys.window, "tab", nil, function()
-  yabai "window --space next"
+  yabai("window --space next")
 end)
 
 Bind(TLKeys.hyper, "tab", nil, function()
-  yabai "window --space prev"
+  yabai("window --space prev")
 end)
 
 -- PiP
 Bind(TLKeys.window, "p", nil, function()
-  yabai "window --toggle sticky --toggle topmost --toggle pip"
+  yabai("window --toggle sticky --toggle topmost --toggle pip")
 end)
