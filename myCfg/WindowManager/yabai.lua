@@ -1,5 +1,7 @@
 local yabaiOutput, _, _, _ = hs.execute("which yabai", true)
 local yabaiBin = string.gsub(yabaiOutput, "%s+", "")
+local jqOutput, _, _, _ = hs.execute("which jq", true)
+local jqBin = string.gsub(jqOutput, "%s+", "")
 local function yabai(args)
   local command = string.format("%s -m %s", yabaiBin, args)
   print(string.format("yabai: %s", command))
@@ -13,9 +15,9 @@ local focusWindowJq = {
 }
 for key, jqExpr in pairs(focusWindowJq) do
   Bind(TLKeys.window, key, nil, function()
-    local cmd = string.format("%s -m query --windows | jq -re '%s'", yabaiBin, jqExpr)
+    local cmd = string.format("%s -m query --windows | %s -re '%s'", yabaiBin, jqBin, jqExpr)
     print(string.format("yabai: %s", cmd))
-    local windowId = string.gsub(hs.execute(cmd, true), "%s+", "")
+    local windowId = string.gsub(hs.execute(cmd, false), "%s+", "")
     if windowId ~= "" then
       yabai(string.format("window --focus %s", windowId))
     end
