@@ -3,7 +3,7 @@
 
   outputs = inputs: let
     inherit (inputs.flake-parts.lib) mkFlake;
-    specialArgs.customLib = builtins.import (inputs.OS-nixCfg + "/lib/custom.nix") {inherit (inputs.nixpkgs) lib;};
+    specialArgs.customLib.scanPaths = path: (inputs.import-tree path).files;
   in
     mkFlake {inherit inputs specialArgs;} ({inputs, ...}: {
       systems = builtins.import inputs.systems;
@@ -37,9 +37,6 @@
         git-hooks.follows = "git-hooks";
       };
     };
-    OS-nixCfg = {
-      url = "github:DivitMittal/OS-nixCfg";
-      flake = false;
-    };
+    import-tree.url = "github:vic/import-tree";
   };
 }
