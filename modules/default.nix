@@ -1,6 +1,9 @@
-_: {
+{inputs, ...}: {
   flake.homeManagerModules = {
-    default = import ./home/hammerspoon.nix;
-    hammerspoon = builtins.import ./home/hammerspoon.nix;
+    ## Default Modules for all home-manager modules
+    default = inputs.import-tree ./home;
+
+    ## Individual Modules
+    hammerspoon = import ./home/hammerspoon.nix;
   };
 }
