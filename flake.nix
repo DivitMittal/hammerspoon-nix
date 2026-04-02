@@ -5,10 +5,10 @@
     inherit (inputs.flake-parts.lib) mkFlake;
   in
     mkFlake {inherit inputs;} ({inputs, ...}: {
-      systems = builtins.import inputs.systems;
+      systems = import inputs.systems;
       imports = [
         (inputs.import-tree ./flake)
-        ./modules/homeManagerModules.nix
+        ./modules
       ];
     });
 
@@ -16,6 +16,7 @@
     nixpkgs.url = "github:nixos/nixpkgs/nixpkgs-unstable";
     flake-parts.url = "github:hercules-ci/flake-parts";
     systems.url = "github:nix-systems/default";
+    import-tree.url = "github:vic/import-tree";
     devshell = {
       url = "github:numtide/devshell";
       inputs.nixpkgs.follows = "nixpkgs";
@@ -36,6 +37,5 @@
         git-hooks.follows = "git-hooks";
       };
     };
-    import-tree.url = "github:vic/import-tree";
   };
 }
