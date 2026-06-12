@@ -1,3 +1,8 @@
+---
+description: Project knowledge for Hammerspoon macOS automation home-manager module and Lua configuration
+applyTo: "**"
+---
+
 ## Project Overview
 
 This is a Nix flake that provides both:
