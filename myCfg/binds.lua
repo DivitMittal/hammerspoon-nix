@@ -24,8 +24,7 @@ Bind(TLKeys.hyper, "return", nil, function()
 end)
 
 -- Warpd (keyboard-driven mouse control)
-local warpdOutput, _, _, _ = hs.execute("which warpd", true)
-local warpdBin = string.gsub(warpdOutput, "%s+", "")
+local warpdBin = resolvebin("warpd")
 
 Bind(TLKeys.hyper, "q", nil, function()
   local command = string.format("%s --normal &", warpdBin)
@@ -52,8 +51,7 @@ Bind(TLKeys.hyper, "i", nil, function()
 end)
 
 -- Bluetooth Toggle
-local blueutilOutput, _, _, _ = hs.execute("which blueutil", true)
-local blueutilBin = string.gsub(blueutilOutput, "%s+", "")
+local blueutilBin = resolvebin("blueutil")
 
 local function blueutil(args)
   local command = string.format("%s %s", blueutilBin, args)
@@ -73,10 +71,8 @@ Bind(TLKeys.hyper, "b", nil, function()
 end)
 
 -- Low Power Mode Toggle
-local rgOutput, _, _, _ = hs.execute("which rg", true)
-local rgBin = string.gsub(rgOutput, "%s+", "")
-local awkOutput, _, _, _ = hs.execute("which awk", true)
-local awkBin = string.gsub(awkOutput, "%s+", "")
+local rgBin = resolvebin("rg")
+local awkBin = resolvebin("awk")
 
 local function pmset(args)
   local command = string.format("/usr/bin/sudo /usr/bin/pmset %s", args)
