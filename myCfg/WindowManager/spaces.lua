@@ -85,7 +85,7 @@ end
 
 local refreshSpaceman = function()
   hs.timer.doAfter(0.2, function()
-    print(hs.execute("cliclick kd:ctrl kp:esc ku:ctrl", true))
+    hs.eventtap.keyStroke({ "ctrl" }, "escape", 0.2)
   end)
 end
 
