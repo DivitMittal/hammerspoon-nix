@@ -26,6 +26,8 @@
             nixd
             alejandra
             stylua
+            ## AI context
+            apm-cli
             ;
         };
       };
