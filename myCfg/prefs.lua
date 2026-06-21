@@ -1,5 +1,14 @@
-hs.ipc.cliInstall() -- installs `hs` binary @ /usr/local/bin with ownership div:admin
-hs.ipc.cliSaveHistory(false)
+local ipcOk, ipc = pcall(function()
+  return hs.ipc
+end)
+
+if ipcOk then
+  ipc.cliInstall() -- installs `hs` binary @ /usr/local/bin with ownership div:admin
+  ipc.cliSaveHistory(false)
+else
+  print(string.format("hs.ipc unavailable: %s", ipc))
+  hs.alert.show "hs.ipc unavailable; another Hammerspoon may be running"
+end
 
 -- enabled
 hs.autoLaunch(true)
