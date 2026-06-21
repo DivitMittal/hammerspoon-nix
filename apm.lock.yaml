@@ -1,0 +1,30 @@
+lockfile_version: '1'
+generated_at: '2026-06-21T03:32:03.879590+00:00'
+dependencies: []
+mcp_servers:
+- serena
+mcp_configs:
+  serena:
+    name: serena
+    transport: stdio
+    args:
+    - --from
+    - git+https://github.com/oraios/serena
+    - serena
+    - start-mcp-server
+    - --context
+    - claude-code
+    - --project
+    - ~/Projects/Cfgs/hammerspoon-nix/
+    registry: false
+    command: uvx
+local_deployed_files:
+- .claude/rules/flake-context.md
+- .claude/rules/modules-context.md
+- .claude/rules/mycfg-context.md
+- .claude/rules/project-knowledge.md
+local_deployed_file_hashes:
+  .claude/rules/flake-context.md: sha256:d0b3e89d2b87a30c74fec36d2a2df9bca6f1c4e2588ce077027c4b80fe200378
+  .claude/rules/modules-context.md: sha256:26f8f7558cd900eedc49841381408dedc932fec235cfba4860077a557e6ce13e
+  .claude/rules/mycfg-context.md: sha256:217e6987b3638c8fdcd5c7927f81d08deac7ba5daf434fab221c6bc710319600
+  .claude/rules/project-knowledge.md: sha256:fb0ef69d5a0780c8572c44866ed54a83e5e9a713176ba41dfed0bc24b7142cd7

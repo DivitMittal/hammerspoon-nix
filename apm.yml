@@ -3,7 +3,10 @@ version: 1.0.0
 description: Home-manager module and personal Lua config for Hammerspoon macOS automation
 author: DivitMittal
 license: MIT
-target: all
+target:
+  - claude
+  - codex
+  - opencode
 type: instructions
 
 dependencies:
