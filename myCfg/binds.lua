@@ -24,7 +24,7 @@ Bind(TLKeys.hyper, "return", nil, function()
 end)
 
 -- Warpd (keyboard-driven mouse control)
-local warpdBin = resolvebin("warpd")
+local warpdBin = resolvebin "warpd"
 
 Bind(TLKeys.hyper, "q", nil, function()
   local command = string.format("%s --normal &", warpdBin)
@@ -51,7 +51,7 @@ Bind(TLKeys.hyper, "i", nil, function()
 end)
 
 -- Bluetooth Toggle
-local blueutilBin = resolvebin("blueutil")
+local blueutilBin = resolvebin "blueutil"
 
 local function blueutil(args)
   local command = string.format("%s %s", blueutilBin, args)
@@ -71,8 +71,8 @@ Bind(TLKeys.hyper, "b", nil, function()
 end)
 
 -- Low Power Mode Toggle
-local rgBin = resolvebin("rg")
-local awkBin = resolvebin("awk")
+local rgBin = resolvebin "rg"
+local awkBin = resolvebin "awk"
 
 local function pmset(args)
   local command = string.format("/usr/bin/sudo /usr/bin/pmset %s", args)
