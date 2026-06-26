@@ -7,28 +7,40 @@ local function resolveBin(bin)
   return string.gsub(output, "%s+", "")
 end
 
-local yabaiBin = resolveBin("yabai")
-local jqBin = resolveBin("jq")
+local yabaiBin = resolveBin "yabai"
 local Yabai = {}
 
 local function shellQuote(value)
   return string.format("'%s'", tostring(value):gsub("'", "'\\''"))
 end
 
+-- yabai's client resolves its socket from $USER, but Hammerspoon's GUI-agent
+-- environment doesn't export it. Resolve it once and prefix every command, so
+-- they keep running through a plain (fast) shell instead of a login shell.
+local userName = os.getenv "USER"
+if not userName or userName == "" then
+  userName = string.gsub(hs.execute("id -un", true), "%s+", "")
+end
+local yabaiCmd = string.format("USER=%s %s", shellQuote(userName), yabaiBin)
+
 function Yabai.action(args)
-  local command = string.format("%s -m %s", yabaiBin, args)
+  local command = string.format("%s -m %s", yabaiCmd, args)
   print(string.format("yabai: %s", command))
-  os.execute(command)
+  hs.execute(command)
 end
 
 function Yabai.query(args)
-  local command = string.format("%s -m query --%s", yabaiBin, args)
+  local command = string.format("%s -m query --%s", yabaiCmd, args)
   print(string.format("yabai: %s", command))
-  return hs.execute(command, false)
+  return hs.execute(command)
 end
 
 function Yabai.queryJson(args, errorMessage)
-  local ok, value = pcall(hs.json.decode, Yabai.query(args))
+  -- Assign to a local first: hs.execute returns (output, status, type, rc),
+  -- and passing Yabai.query directly as the last call argument would expand
+  -- all four into hs.json.decode, whose extra `status` arg makes it throw.
+  local output = Yabai.query(args)
+  local ok, value = pcall(hs.json.decode, output)
 
   if not ok or type(value) ~= "table" then
     hs.alert.show(errorMessage)
