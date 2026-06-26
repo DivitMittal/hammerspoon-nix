@@ -62,27 +62,95 @@ function Yabai.renameSpace(spaceIndex, label)
   Yabai.action(string.format("space %s --label %s", spaceIndex, shellQuote(label)))
 end
 
--- Focus windows linearly (BSP & floating) — up=prev, down=next in sorted order
-local focusWindowJq = {
-  up = [[sort_by(.display, .space, .frame.x, .frame.y, .id) | map(select(."is-visible" == true and .role != "AXUnknown")) | . as $w | ($w | map(."has-focus") | index(true)) as $i | if $i != null then $w[$i - 1].id else empty end]],
-  down = [[sort_by(.display, .space, .frame.x, .frame.y, .id) | map(select(."is-visible" == true and .role != "AXUnknown")) | . as $w | ($w | map(."has-focus") | index(true)) as $i | if $i != null then $w[($i + 1) % ($w | length)].id else empty end]],
-}
-for key, jqExpr in pairs(focusWindowJq) do
-  Bind(TLKeys.window, key, nil, function()
-    local cmd = string.format("%s -m query --windows | %s -re '%s' 2>&1", yabaiBin, jqBin, jqExpr)
-    print(string.format("yabai: %s", cmd))
-    local windowId = string.gsub(hs.execute(cmd, false), "%s+", "")
-    if windowId ~= "" then
-      Yabai.focusWindow(windowId)
+-- Visible, selectable windows on the current space, sorted into a stable
+-- left-to-right, top-to-bottom order (x → y → id). Pure Lua: one yabai
+-- query, no jq subprocess and no shell-quoting hazards.
+local function sortedVisibleWindows()
+  local windows = Yabai.queryJson("windows --space", "Could not read yabai windows")
+  if not windows then
+    return nil
+  end
+
+  local visible = {}
+  for _, win in ipairs(windows) do
+    if win["is-visible"] == true and win.role ~= "AXUnknown" then
+      visible[#visible + 1] = win
     end
+  end
+
+  table.sort(visible, function(a, b)
+    if a.frame.x ~= b.frame.x then
+      return a.frame.x < b.frame.x
+    end
+    if a.frame.y ~= b.frame.y then
+      return a.frame.y < b.frame.y
+    end
+    return a.id < b.id
+  end)
+
+  return visible
+end
+
+-- Focus windows linearly (BSP & floating) — up = prev, down = next, both wrap.
+local focusOffset = { up = -1, down = 1 }
+for key, offset in pairs(focusOffset) do
+  Bind(TLKeys.window, key, nil, function()
+    local windows = sortedVisibleWindows()
+    if not windows or #windows == 0 then
+      return
+    end
+
+    local focusedIndex
+    for index, win in ipairs(windows) do
+      if win["has-focus"] then
+        focusedIndex = index
+        break
+      end
+    end
+    if not focusedIndex then
+      return
+    end
+
+    -- 1-based modular neighbour; wraps at both ends like the old jq filter.
+    local target = (focusedIndex - 1 + offset) % #windows + 1
+    Yabai.focusWindow(windows[target].id)
   end)
 end
 
--- Focus spaces
-local focus = { right = "next", left = "prev" }
-for key, direction in pairs(focus) do
+-- Mission-control index of the space `offset` steps from the focused one,
+-- restricted to (and wrapping within) the current display. nil if unknown.
+local function adjacentSpaceOnDisplay(offset)
+  local spaces = Yabai.queryJson("spaces --display", "Could not read yabai spaces")
+  if not spaces or #spaces == 0 then
+    return nil
+  end
+
+  table.sort(spaces, function(a, b)
+    return a.index < b.index
+  end)
+
+  local focusedIndex
+  for i, space in ipairs(spaces) do
+    if space["has-focus"] then
+      focusedIndex = i
+      break
+    end
+  end
+  if not focusedIndex then
+    return nil
+  end
+
+  return spaces[(focusedIndex - 1 + offset) % #spaces + 1].index
+end
+
+-- Focus the next/previous space within the current display (wraps).
+local spaceFocus = { right = 1, left = -1 }
+for key, offset in pairs(spaceFocus) do
   Bind(TLKeys.window, key, nil, function()
-    Yabai.focusSpace(direction)
+    local index = adjacentSpaceOnDisplay(offset)
+    if index then
+      Yabai.focusSpace(index)
+    end
   end)
 end
 
@@ -98,18 +166,34 @@ for key, action in pairs(exist) do
   end)
 end
 
--- Carry windows to next/previous space
+-- Throw the focused window to the next/previous space within the current
+-- display, staying on the current space (yabai does not follow by default).
+local function throwWindowToAdjacentSpace(offset)
+  local index = adjacentSpaceOnDisplay(offset)
+  if index then
+    Yabai.action(string.format("window --space %s", index))
+  end
+end
+
 Bind(TLKeys.window, "tab", nil, function()
-  Yabai.action("window --space next")
+  throwWindowToAdjacentSpace(1)
 end)
 
-Bind(TLKeys.hyper, "tab", nil, function()
-  Yabai.action("window --space prev")
+Bind(TLKeys.windowShift, "tab", nil, function()
+  throwWindowToAdjacentSpace(-1)
 end)
+
+-- Move the focused window to the display in a given direction.
+local moveDisplay = { m = "west", o = "east", u = "north", [","] = "south" }
+for key, dir in pairs(moveDisplay) do
+  Bind(TLKeys.window, key, nil, function()
+    Yabai.action(string.format("window --display %s", dir))
+  end)
+end
 
 -- PiP
 Bind(TLKeys.window, "p", nil, function()
-  Yabai.action("window --toggle sticky --toggle topmost --toggle pip")
+  Yabai.action "window --toggle sticky --toggle topmost --toggle pip"
 end)
 
 return Yabai
