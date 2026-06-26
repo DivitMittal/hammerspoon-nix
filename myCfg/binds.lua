@@ -16,7 +16,7 @@ local bundleID = {
   wezterm = "com.github.wez.wezterm",
 }
 local app = require "hs.application"
-Bind(TLKeys.hyper, "s", nil, function()
+Bind(TLKeys.hyper, "w", nil, function()
   app.launchOrFocusByBundleID(bundleID.firefox)
 end)
 Bind(TLKeys.hyper, "return", nil, function()
