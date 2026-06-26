@@ -1,257 +1,240 @@
 local Yabai = require "WindowManager.yabai"
 
-local windowHistory = {}
-local sameAppWindowHistory = {}
-local spaceChooser
-local renameSpaceChooser
-local switcherTapInterval = 0.65
-local switcherSession = {
-  mode = nil,
-  lastTap = 0,
-  index = 0,
-  windowIds = {},
-}
-
 local function isSelectableWindow(win)
   return win.id and win.role ~= "AXUnknown"
 end
 
--- Single yabai query returning the selectable windows in `scope` plus the
--- focused window object (found via `has-focus`). Replaces two separate
--- queries — one subprocess per keystroke instead of two.
-local function querySelectableWindows(scope)
-  local windows = Yabai.queryJson(scope, "Could not read yabai windows")
+-- Stable left-to-right, top-to-bottom order (x → y → id) so the same window
+-- lands in the same chooser row every time — unlike MRU, which reshuffles.
+local function spatialLess(a, b)
+  if a.frame.x ~= b.frame.x then
+    return a.frame.x < b.frame.x
+  end
+  if a.frame.y ~= b.frame.y then
+    return a.frame.y < b.frame.y
+  end
+  return a.id < b.id
+end
+
+local function windowTitle(win)
+  return win.title and win.title ~= "" and win.title or "(untitled)"
+end
+
+-- One reusable chooser for both window pickers; choices/placeholder are
+-- replaced on each show, and the completion callback focuses the pick.
+local windowChooser
+
+local function windowChooserFor(placeholder)
+  if not windowChooser then
+    windowChooser = hs.chooser.new(function(choice)
+      if choice and choice.windowId then
+        Yabai.focusWindow(choice.windowId)
+      end
+    end)
+    windowChooser:searchSubText(true)
+    windowChooser:rows(10)
+  end
+
+  windowChooser:placeholderText(placeholder)
+  return windowChooser
+end
+
+-- window+w: every selectable window on the current space, in spatial order.
+local function chooseCurrentSpaceWindows()
+  local windows = Yabai.queryJson("windows --space", "Could not read yabai windows")
   if not windows then
-    return nil, nil
+    return
   end
 
-  local selectableWindows = {}
-  local focusedWindow
+  local selectable = {}
   for _, win in ipairs(windows) do
-    if win["has-focus"] then
-      focusedWindow = win
-    end
     if isSelectableWindow(win) then
-      table.insert(selectableWindows, win)
+      selectable[#selectable + 1] = win
     end
   end
-
-  return selectableWindows, focusedWindow
-end
-
-local function recordFocusedWindow(win)
-  if not win then
-    return
-  end
-
-  local app = win:application()
-  local appName = app and app:name()
-  local windowId = win:id()
-  if not appName or not windowId then
-    return
-  end
-
-  for index = #windowHistory, 1, -1 do
-    if windowHistory[index] == windowId then
-      table.remove(windowHistory, index)
-    end
-  end
-  table.insert(windowHistory, 1, windowId)
-
-  local history = sameAppWindowHistory[appName] or {}
-  for index = #history, 1, -1 do
-    if history[index] == windowId then
-      table.remove(history, index)
-    end
-  end
-
-  table.insert(history, 1, windowId)
-  sameAppWindowHistory[appName] = history
-end
-
-hs.window.filter.default:rejectApp "iStat Menus"
-hs.window.filter.default:subscribe(hs.window.filter.windowFocused, recordFocusedWindow)
-
-local function getOrderedWindowIds(windows, currentWindowId, history)
-  local validWindowIds = {}
-  for _, win in ipairs(windows) do
-    validWindowIds[win.id] = true
-  end
-
-  local orderedWindowIds = {}
-  local includedWindowIds = {}
-  for _, windowId in ipairs(history) do
-    if windowId ~= currentWindowId and validWindowIds[windowId] then
-      table.insert(orderedWindowIds, windowId)
-      includedWindowIds[windowId] = true
-    end
-  end
-
-  for _, win in ipairs(windows) do
-    if win.id ~= currentWindowId and not includedWindowIds[win.id] then
-      table.insert(orderedWindowIds, win.id)
-    end
-  end
-
-  return orderedWindowIds
-end
-
-local function cycleWindows(mode, windows, currentWindowId, history, emptyMessage)
-  local now = hs.timer.secondsSinceEpoch()
-  local keepCycling = switcherSession.mode == mode
-    and now - switcherSession.lastTap <= switcherTapInterval
-    and #switcherSession.windowIds > 0
-
-  if not keepCycling then
-    switcherSession.mode = mode
-    switcherSession.index = 0
-    switcherSession.windowIds = getOrderedWindowIds(windows, currentWindowId, history)
-  end
-
-  switcherSession.lastTap = now
-
-  if #switcherSession.windowIds == 0 then
-    hs.alert.show(emptyMessage)
-    return
-  end
-
-  switcherSession.index = switcherSession.index % #switcherSession.windowIds + 1
-  Yabai.focusWindow(switcherSession.windowIds[switcherSession.index])
-end
-
-local function cycleCurrentSpaceWindows()
-  local windows, focusedWindow = querySelectableWindows "windows --space"
-  if not windows or not focusedWindow then
-    return
-  end
-
-  cycleWindows("current-space", windows, focusedWindow.id, windowHistory, "No other windows on current space")
-end
-
-local function cycleSameAppWindows()
-  local allWindows, focusedWindow = querySelectableWindows "windows"
-  if not allWindows or not focusedWindow then
-    return
-  end
-
-  local appName = focusedWindow.app
-  if not appName or appName == "" then
-    hs.alert.show "Focused window has no app name"
-    return
-  end
-
-  local windows = {}
-  for _, win in ipairs(allWindows) do
-    if win.app == appName then
-      table.insert(windows, win)
-    end
-  end
-
-  cycleWindows(
-    "same-app",
-    windows,
-    focusedWindow.id,
-    sameAppWindowHistory[appName] or {},
-    string.format("No other %s windows", appName)
-  )
-end
-
-local function chooseCurrentDisplaySpace()
-  local spaces = Yabai.queryJson("spaces --display", "Could not read yabai spaces")
-  if not spaces then
-    return
-  end
+  table.sort(selectable, spatialLess)
 
   local choices = {}
-  for _, space in ipairs(spaces) do
-    if space.index then
-      local label = space.label and space.label ~= "" and space.label or string.format("Space %s", space.index)
-      local focusMark = space["has-focus"] and "● " or ""
-      local windowCount = type(space.windows) == "table" and #space.windows or 0
-      table.insert(choices, {
-        text = string.format("%s%s", focusMark, label),
-        subText = string.format("index %s · %s windows", space.index, windowCount),
-        index = space.index,
-        label = space.label or "",
-      })
-    end
+  for _, win in ipairs(selectable) do
+    local focusMark = win["has-focus"] and "● " or ""
+    choices[#choices + 1] = {
+      text = string.format("%s%s", focusMark, win.app or "?"),
+      subText = windowTitle(win),
+      windowId = win.id,
+    }
   end
 
   if #choices == 0 then
-    hs.alert.show "No spaces on current display"
+    hs.alert.show "No windows on current space"
+    return
+  end
+
+  local chooser = windowChooserFor "Choose window on this space"
+  chooser:choices(choices)
+  chooser:show()
+end
+
+-- window+a: every window of the focused app across all spaces and displays,
+-- grouped by space then spatial within each space.
+local function chooseSameAppWindows()
+  local windows = Yabai.queryJson("windows", "Could not read yabai windows")
+  if not windows then
+    return
+  end
+
+  local focusedApp
+  for _, win in ipairs(windows) do
+    if win["has-focus"] then
+      focusedApp = win.app
+      break
+    end
+  end
+  if not focusedApp or focusedApp == "" then
+    hs.alert.show "Focused window has no app"
+    return
+  end
+
+  local appWindows = {}
+  for _, win in ipairs(windows) do
+    if isSelectableWindow(win) and win.app == focusedApp then
+      appWindows[#appWindows + 1] = win
+    end
+  end
+
+  table.sort(appWindows, function(a, b)
+    if a.space ~= b.space then
+      return (a.space or 0) < (b.space or 0)
+    end
+    return spatialLess(a, b)
+  end)
+
+  local choices = {}
+  for _, win in ipairs(appWindows) do
+    local focusMark = win["has-focus"] and "● " or ""
+    choices[#choices + 1] = {
+      text = string.format("%s%s", focusMark, windowTitle(win)),
+      subText = string.format("space %s · display %s", win.space or "?", win.display or "?"),
+      windowId = win.id,
+    }
+  end
+
+  if #choices == 0 then
+    hs.alert.show(string.format("No %s windows", focusedApp))
+    return
+  end
+
+  local chooser = windowChooserFor(string.format("Choose %s window", focusedApp))
+  chooser:choices(choices)
+  chooser:show()
+end
+
+-- window+s: every space, sectioned by display. Header rows carry no
+-- spaceIndex, so they are inert in both the focus and rename paths.
+local spaceChooser
+local renameHotkey
+
+local function buildSpaceChoices()
+  local spaces = Yabai.queryJson("spaces", "Could not read yabai spaces")
+  if not spaces then
+    return nil
+  end
+
+  local byDisplay = {}
+  local displayOrder = {}
+  for _, space in ipairs(spaces) do
+    local display = space.display or 0
+    if not byDisplay[display] then
+      byDisplay[display] = {}
+      displayOrder[#displayOrder + 1] = display
+    end
+    local group = byDisplay[display]
+    group[#group + 1] = space
+  end
+  table.sort(displayOrder)
+
+  local choices = {}
+  for _, display in ipairs(displayOrder) do
+    local group = byDisplay[display]
+    table.sort(group, function(a, b)
+      return a.index < b.index
+    end)
+
+    choices[#choices + 1] = {
+      text = string.format("Display %s", display),
+      subText = string.format("%s spaces", #group),
+      isHeader = true,
+    }
+
+    for _, space in ipairs(group) do
+      local label = space.label and space.label ~= "" and space.label or string.format("Space %s", space.index)
+      local focusMark = space["has-focus"] and "● " or ""
+      local windowCount = type(space.windows) == "table" and #space.windows or 0
+      choices[#choices + 1] = {
+        text = string.format("    %s%s", focusMark, label),
+        subText = string.format("index %s · %s windows", space.index, windowCount),
+        spaceIndex = space.index,
+        label = space.label or "",
+      }
+    end
+  end
+
+  return choices
+end
+
+local function showSpaceChooser()
+  local choices = buildSpaceChoices()
+  if not choices or #choices == 0 then
+    hs.alert.show "No spaces"
     return
   end
 
   if not spaceChooser then
     spaceChooser = hs.chooser.new(function(choice)
-      if choice then
-        Yabai.focusSpace(choice.index)
+      if renameHotkey then
+        renameHotkey:disable()
+      end
+      if choice and choice.spaceIndex then
+        Yabai.focusSpace(choice.spaceIndex)
       end
     end)
 
-    spaceChooser:placeholderText "Choose space"
+    spaceChooser:placeholderText "Choose space (⌘R to rename)"
     spaceChooser:searchSubText(true)
-    spaceChooser:rows(8)
+    spaceChooser:rows(10)
   end
 
   spaceChooser:choices(choices)
   spaceChooser:show()
-end
 
-local function renameCurrentDisplaySpace()
-  local spaces = Yabai.queryJson("spaces --display", "Could not read yabai spaces")
-  if not spaces then
-    return
-  end
-
-  local choices = {}
-  for _, space in ipairs(spaces) do
-    if space.index then
-      local label = space.label and space.label ~= "" and space.label or string.format("Space %s", space.index)
-      local focusMark = space["has-focus"] and "● " or ""
-      table.insert(choices, {
-        text = string.format("%s%s", focusMark, label),
-        subText = string.format("rename index %s", space.index),
-        index = space.index,
-        label = space.label or "",
-      })
-    end
-  end
-
-  if #choices == 0 then
-    hs.alert.show "No spaces on current display"
-    return
-  end
-
-  if not renameSpaceChooser then
-    renameSpaceChooser = hs.chooser.new(function(choice)
-      if not choice then
+  -- ⌘R renames the highlighted space, leaving plain `r` free for searching.
+  -- The hotkey is global, so we only keep it live while the chooser is open.
+  if not renameHotkey then
+    renameHotkey = hs.hotkey.new({ "cmd" }, "r", function()
+      local choice = spaceChooser:selectedRowContents()
+      if not choice or not choice.spaceIndex then
         return
       end
 
+      spaceChooser:hide()
+      renameHotkey:disable()
+
       local button, newLabel = hs.dialog.textPrompt(
         "Rename Space",
-        string.format("New name for space %s", choice.index),
+        string.format("New name for space %s", choice.spaceIndex),
         choice.label,
         "Rename",
         "Cancel"
       )
-
       if button == "Rename" and newLabel and newLabel ~= "" then
-        Yabai.renameSpace(choice.index, newLabel)
+        Yabai.renameSpace(choice.spaceIndex, newLabel)
       end
+
+      showSpaceChooser()
     end)
-
-    renameSpaceChooser:placeholderText "Choose space to rename"
-    renameSpaceChooser:searchSubText(true)
-    renameSpaceChooser:rows(8)
   end
-
-  renameSpaceChooser:choices(choices)
-  renameSpaceChooser:show()
+  renameHotkey:enable()
 end
 
-Bind(TLKeys.window, "w", nil, cycleCurrentSpaceWindows)
-Bind(TLKeys.window, "a", nil, cycleSameAppWindows)
-Bind(TLKeys.window, "s", nil, chooseCurrentDisplaySpace)
-Bind(TLKeys.windowShift, "r", nil, renameCurrentDisplaySpace)
+Bind(TLKeys.window, "w", nil, chooseCurrentSpaceWindows)
+Bind(TLKeys.window, "a", nil, chooseSameAppWindows)
+Bind(TLKeys.window, "s", nil, showSpaceChooser)
