@@ -12,44 +12,31 @@ local switcherSession = {
   windowIds = {},
 }
 
-local function getFocusedWindow()
-  return Yabai.queryJson("windows --window", "Could not read focused window")
-end
-
 local function isSelectableWindow(win)
   return win.id and win.role ~= "AXUnknown"
 end
 
-local function getCurrentSpaceWindows()
-  local windows = Yabai.queryJson("windows --space", "Could not read yabai windows")
+-- Single yabai query returning the selectable windows in `scope` plus the
+-- focused window object (found via `has-focus`). Replaces two separate
+-- queries — one subprocess per keystroke instead of two.
+local function querySelectableWindows(scope)
+  local windows = Yabai.queryJson(scope, "Could not read yabai windows")
   if not windows then
-    return nil
+    return nil, nil
   end
 
   local selectableWindows = {}
+  local focusedWindow
   for _, win in ipairs(windows) do
+    if win["has-focus"] then
+      focusedWindow = win
+    end
     if isSelectableWindow(win) then
       table.insert(selectableWindows, win)
     end
   end
 
-  return selectableWindows
-end
-
-local function getWindowsForApp(appName)
-  local windows = Yabai.queryJson("windows", "Could not read yabai windows")
-  if not windows then
-    return nil
-  end
-
-  local appWindows = {}
-  for _, win in ipairs(windows) do
-    if isSelectableWindow(win) and win.app == appName then
-      table.insert(appWindows, win)
-    end
-  end
-
-  return appWindows
+  return selectableWindows, focusedWindow
 end
 
 local function recordFocusedWindow(win)
@@ -82,6 +69,7 @@ local function recordFocusedWindow(win)
   sameAppWindowHistory[appName] = history
 end
 
+hs.window.filter.default:rejectApp "iStat Menus"
 hs.window.filter.default:subscribe(hs.window.filter.windowFocused, recordFocusedWindow)
 
 local function getOrderedWindowIds(windows, currentWindowId, history)
@@ -132,13 +120,8 @@ local function cycleWindows(mode, windows, currentWindowId, history, emptyMessag
 end
 
 local function cycleCurrentSpaceWindows()
-  local focusedWindow = getFocusedWindow()
-  if not focusedWindow then
-    return
-  end
-
-  local windows = getCurrentSpaceWindows()
-  if not windows then
+  local windows, focusedWindow = querySelectableWindows "windows --space"
+  if not windows or not focusedWindow then
     return
   end
 
@@ -146,8 +129,8 @@ local function cycleCurrentSpaceWindows()
 end
 
 local function cycleSameAppWindows()
-  local focusedWindow = getFocusedWindow()
-  if not focusedWindow then
+  local allWindows, focusedWindow = querySelectableWindows "windows"
+  if not allWindows or not focusedWindow then
     return
   end
 
@@ -157,12 +140,20 @@ local function cycleSameAppWindows()
     return
   end
 
-  local windows = getWindowsForApp(appName)
-  if not windows then
-    return
+  local windows = {}
+  for _, win in ipairs(allWindows) do
+    if win.app == appName then
+      table.insert(windows, win)
+    end
   end
 
-  cycleWindows("same-app", windows, focusedWindow.id, sameAppWindowHistory[appName] or {}, string.format("No other %s windows", appName))
+  cycleWindows(
+    "same-app",
+    windows,
+    focusedWindow.id,
+    sameAppWindowHistory[appName] or {},
+    string.format("No other %s windows", appName)
+  )
 end
 
 local function chooseCurrentDisplaySpace()
