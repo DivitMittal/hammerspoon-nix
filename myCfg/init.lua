@@ -1,5 +1,5 @@
 Font = {}
-Font.default = "CaskaydiaCode NFM"
+Font.default = "CaskaydiaCove Nerd Font Mono"
 
 -- Search directories, built once: $PATH entries first, then common
 -- Nix/Homebrew/system fallbacks. Deduplicated so we never stat a dir twice.
