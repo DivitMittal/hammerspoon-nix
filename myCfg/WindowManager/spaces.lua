@@ -90,25 +90,25 @@ local refreshSpaceman = function()
 end
 
 -- Binds
-Bind(TLKeys.window, "right", nil, function()
+windowBind("right", nil, function()
   goNextSpace()
 end)
 
-Bind(TLKeys.window, "left", nil, function()
+windowBind("left", nil, function()
   goPrevSpace()
 end)
 
-Bind(TLKeys.window, "d", nil, function()
+windowBind("d", nil, function()
   removeCurrentSpace()
   refreshSpaceman()
 end)
 
-Bind(TLKeys.window, "c", nil, function()
+windowBind("c", nil, function()
   spaces.addSpaceToScreen()
   refreshSpaceman()
 end)
 
-Bind(TLKeys.window, "tab", nil, function()
+windowBind("tab", nil, function()
   Drag:focusedWindowToSpace(getNextSpaceID())
 end)
 

@@ -235,6 +235,6 @@ local function showSpaceChooser()
   renameHotkey:enable()
 end
 
-Bind(TLKeys.window, "w", nil, chooseCurrentSpaceWindows)
-Bind(TLKeys.window, "a", nil, chooseSameAppWindows)
-Bind(TLKeys.window, "s", nil, showSpaceChooser)
+windowBind("w", nil, chooseCurrentSpaceWindows)
+windowBind("a", nil, chooseSameAppWindows)
+windowBind("s", nil, showSpaceChooser)

@@ -113,13 +113,13 @@ end
 ------
 -- Binds
 ------
-Bind(TLKeys.window, "0", nil, centerCurrentWindow)
-Bind(TLKeys.window, "1", nil, moveCurrentWindowToBottomLeft)
-Bind(TLKeys.window, "2", nil, moveCurrentWindowToBottomHalf)
-Bind(TLKeys.window, "3", nil, moveCurrentWindowToBottomRight)
-Bind(TLKeys.window, "4", nil, moveCurrentWindowToLeftHalf)
-Bind(TLKeys.window, "5", nil, maximizeCurrentWindow)
-Bind(TLKeys.window, "6", nil, moveCurrentWindowToRightHalf)
-Bind(TLKeys.window, "7", nil, moveCurrentWindowToTopLeft)
-Bind(TLKeys.window, "8", nil, moveCurrentWindowToTopHalf)
-Bind(TLKeys.window, "9", nil, moveCurrentWindowToTopRight)
+windowBind("0", nil, centerCurrentWindow)
+windowBind("1", nil, moveCurrentWindowToBottomLeft)
+windowBind("2", nil, moveCurrentWindowToBottomHalf)
+windowBind("3", nil, moveCurrentWindowToBottomRight)
+windowBind("4", nil, moveCurrentWindowToLeftHalf)
+windowBind("5", nil, maximizeCurrentWindow)
+windowBind("6", nil, moveCurrentWindowToRightHalf)
+windowBind("7", nil, moveCurrentWindowToTopLeft)
+windowBind("8", nil, moveCurrentWindowToTopHalf)
+windowBind("9", nil, moveCurrentWindowToTopRight)

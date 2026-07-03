@@ -94,7 +94,7 @@ end
 -- Focus windows linearly (BSP & floating) — up = prev, down = next, both wrap.
 local focusOffset = { up = -1, down = 1 }
 for key, offset in pairs(focusOffset) do
-  Bind(TLKeys.window, key, nil, function()
+  windowBind(key, nil, function()
     local windows = sortedVisibleWindows()
     if not windows or #windows == 0 then
       return
@@ -146,7 +146,7 @@ end
 -- Focus the next/previous space within the current display (wraps).
 local spaceFocus = { right = 1, left = -1 }
 for key, offset in pairs(spaceFocus) do
-  Bind(TLKeys.window, key, nil, function()
+  windowBind(key, nil, function()
     local index = adjacentSpaceOnDisplay(offset)
     if index then
       Yabai.focusSpace(index)
@@ -160,7 +160,7 @@ local refreshSpaceman = function()
 end
 local exist = { c = "create", d = "destroy" }
 for key, action in pairs(exist) do
-  Bind(TLKeys.window, key, nil, function()
+  windowBind(key, nil, function()
     Yabai.action(string.format("space --%s", action))
     refreshSpaceman()
   end)
@@ -175,24 +175,24 @@ local function throwWindowToAdjacentSpace(offset)
   end
 end
 
-Bind(TLKeys.window, "tab", nil, function()
+windowBind("tab", nil, function()
   throwWindowToAdjacentSpace(1)
 end)
 
-Bind(TLKeys.windowShift, "tab", nil, function()
+windowBind("tab", { "shift" }, function()
   throwWindowToAdjacentSpace(-1)
 end)
 
 -- Move the focused window to the display in a given direction.
 local moveDisplay = { m = "west", o = "east", u = "north", [","] = "south" }
 for key, dir in pairs(moveDisplay) do
-  Bind(TLKeys.window, key, nil, function()
+  windowBind(key, nil, function()
     Yabai.action(string.format("window --display %s", dir))
   end)
 end
 
 -- PiP
-Bind(TLKeys.window, "p", nil, function()
+windowBind("p", nil, function()
   Yabai.action "window --toggle sticky --toggle topmost --toggle pip"
 end)
 
