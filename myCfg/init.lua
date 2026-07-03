@@ -44,5 +44,6 @@ end
 
 require "prefs"
 require "binds"
+require "pointer"
 require "WindowManager"
 -- require "vim"

@@ -23,26 +23,6 @@ Bind(TLKeys.hyper, "return", nil, function()
   app.launchOrFocusByBundleID(bundleID.wezterm)
 end)
 
--- Warpd (keyboard-driven mouse control)
-local warpdBin = resolvebin "warpd"
-
-Bind(TLKeys.hyper, "q", nil, function()
-  local command = string.format("%s --normal &", warpdBin)
-  os.execute(command)
-end)
-Bind(TLKeys.hyper, "g", nil, function()
-  local command = string.format("%s --grid --oneshot &", warpdBin)
-  os.execute(command)
-end)
-Bind(TLKeys.hyper, "x", nil, function()
-  local command = string.format("%s --hint2 --oneshot &", warpdBin)
-  os.execute(command)
-end)
-Bind(TLKeys.hyper, "f", nil, function()
-  local command = string.format("%s --smart-hint --oneshot &", warpdBin)
-  os.execute(command)
-end)
-
 -- Wifi Toggle
 Bind(TLKeys.hyper, "i", nil, function()
   local wifi = require "hs.wifi"
