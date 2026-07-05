@@ -112,6 +112,6 @@ windowBind("tab", nil, function()
   Drag:focusedWindowToSpace(getNextSpaceID())
 end)
 
-Bind(TLKeys.hyper, "tab", nil, function()
+windowBind("tab", { "shift" }, function()
   Drag:focusedWindowToSpace(getPreviousSpaceID())
 end)
