@@ -128,8 +128,8 @@ local function chooseSameAppWindows()
   chooser:show()
 end
 
--- window+s: every space, sectioned by display. Header rows carry no
--- spaceIndex, so they are inert in both the focus and rename paths.
+-- window+s: every space, ordered by display. Displays are shown in the
+-- space row metadata, not as separate chooser rows.
 local spaceChooser
 local renameHotkey
 
@@ -159,19 +159,13 @@ local function buildSpaceChoices()
       return a.index < b.index
     end)
 
-    choices[#choices + 1] = {
-      text = string.format("Display %s", display),
-      subText = string.format("%s spaces", #group),
-      isHeader = true,
-    }
-
     for _, space in ipairs(group) do
       local label = space.label and space.label ~= "" and space.label or string.format("Space %s", space.index)
       local focusMark = space["has-focus"] and "● " or ""
       local windowCount = type(space.windows) == "table" and #space.windows or 0
       choices[#choices + 1] = {
-        text = string.format("    %s%s", focusMark, label),
-        subText = string.format("index %s · %s windows", space.index, windowCount),
+        text = string.format("%s%s", focusMark, label),
+        subText = string.format("display %s · index %s · %s windows", display, space.index, windowCount),
         spaceIndex = space.index,
         label = space.label or "",
       }
