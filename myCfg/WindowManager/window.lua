@@ -110,9 +110,7 @@ local function moveCurrentWindowToBottomRight()
   win:setFrame(newFrame)
 end
 
-------
 -- Binds
-------
 windowBind("0", nil, centerCurrentWindow)
 windowBind("1", nil, moveCurrentWindowToBottomLeft)
 windowBind("2", nil, moveCurrentWindowToBottomHalf)

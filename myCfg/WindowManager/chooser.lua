@@ -229,6 +229,7 @@ local function showSpaceChooser()
   renameHotkey:enable()
 end
 
+-- Binds
 windowBind("w", nil, chooseCurrentSpaceWindows)
 windowBind("a", nil, chooseSameAppWindows)
 windowBind("s", nil, showSpaceChooser)
