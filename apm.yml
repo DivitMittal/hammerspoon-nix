@@ -2,7 +2,7 @@ name: hammerspoon-nix
 version: 1.0.0
 description: Home-manager module and personal Lua config for Hammerspoon macOS automation
 author: DivitMittal
-license: MIT
+license: LicenseRef-HONCL-1.0
 target:
   - claude
   - codex
